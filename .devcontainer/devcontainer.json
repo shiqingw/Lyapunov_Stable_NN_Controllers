@@ -1,0 +1,86 @@
+{
+	"name": "lyapunov-stable-nn-controllers",
+	"build": {
+        "context": "..",
+        "dockerfile": "Dockerfile",
+		"args": {
+            "NO_CACHE": "1"
+        }
+    },
+
+	"containerEnv": {
+        "DISPLAY": "unix:0",
+        // "ROS_LOCALHOST_ONLY": "1",
+        // "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST",
+        // "ROS_DOMAIN_ID": "42",
+        "SHELL": "/bin/bash",
+		"TZ": "America/New_York"
+    },
+	"runArgs": [
+		"--privileged",
+        "--gpus", "all",
+        "-v",
+        "/dev:/dev",
+        "-e",
+        "DISPLAY=${env:DISPLAY}",
+        "--ulimit=core=-1",
+		"--net=host",
+		"--ipc=host"
+	],
+	"mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+        // "source=${localEnv:HOME}/template/logging/,target=/workspaces/logging,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.bash_history,target=/home/dev/.bash_history,type=bind,consistency=cached"
+    ],
+	// Install this repo (makes `neural_lyapunov_training` importable; --no-deps so it
+	// does not re-pin numpy/scipy already installed in the image) and repair the
+	// relative `verification/complete_verifier` symlink, which expects
+	// `alpha-beta-CROWN` to live inside the repo root (the image clones it to
+	// /workspace/alpha-beta-CROWN, outside the bind mount).
+	"postCreateCommand": "pip install -e . --no-deps && ln -sfn /workspace/alpha-beta-CROWN alpha-beta-CROWN",
+  	"remoteUser": "root",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace/Lyapunov_Stable_NN_Controllers,type=bind",
+	"workspaceFolder": "/workspace/Lyapunov_Stable_NN_Controllers",
+	"customizations": {
+		"vscode": {
+			"settings": {
+                "extensions.verifySignature": false
+            },
+			"extensions": [
+				"cheshirekow.cmake-format",
+				"github.copilot",
+				"llvm-vs-code-extensions.vscode-clangd",
+				"ms-azuretools.vscode-docker",
+				// "ms-iot.vscode-ros",
+				"ms-python.black-formatter",
+				"ms-python.debugpy",
+				// "ms-python.flake8",
+				"ms-python.isort",
+				"ms-python.pylint",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-toolsai.jupyter",
+				"ms-vscode.cmake-tools",
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-vscode.cpptools-themes",
+				"mutantdino.resourcemonitor",
+				"twxs.cmake",
+				"vadimcn.vscode-lldb",
+				"xaver.clang-format",
+				"grapecity.gc-excelviewer",
+				"mechatroner.rainbow-csv"
+			]
+		}
+	},
+	"forwardPorts": [
+        3000
+    ],
+    "portsAttributes": {
+        "3000": {
+            "label": "Application",
+            "onAutoForward": "notify"
+        }
+    }
+}

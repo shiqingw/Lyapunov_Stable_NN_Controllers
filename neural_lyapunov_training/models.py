@@ -22,6 +22,7 @@ import neural_lyapunov_training.pendulum as pendulum
 import neural_lyapunov_training.quadrotor2d as quadrotor2d
 import neural_lyapunov_training.path_tracking as path_tracking
 import neural_lyapunov_training.pvtol as pvtol
+import neural_lyapunov_training.example3d as example3d
 
 from neural_lyapunov_training.controllers import LinearController
 
@@ -541,6 +542,19 @@ def create_path_tracking_model(dt=0.05, **kwargs):
     return create_model(
         dynamical_system.FirstOrderDiscreteTimeSystem(
             path_tracking.PathTrackingDynamics(speed=2.0, length=1.0, radius=10.0), dt
+        ),
+        **kwargs,
+    )
+
+
+def create_example3d_model(dt=0.05, **kwargs):
+    """
+    Build the computational graph for verification of the 3-state polynomial
+    example system.
+    """
+    return create_model(
+        dynamical_system.FirstOrderDiscreteTimeSystem(
+            example3d.Example3DDynamics(), dt
         ),
         **kwargs,
     )
