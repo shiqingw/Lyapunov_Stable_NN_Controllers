@@ -18,7 +18,7 @@ data:
   # Use the box_data() loader in "lyapunov_models.py".
   # Scale is the factor of tbe verification box. Set scale = 1.0 by default. Reduce scale to make the problem easier.
   # hole_size must be 1.0 here, since we want to find the minimum on the boundary.
-  dataset: Customized("models.py", "box_data", lower_limit=[-2, -2, -2], upper_limit=[2, 2, 2], ndim=3, scale=1.0, hole_size=1.0)
+  dataset: Customized("models.py", "box_data", lower_limit=[-5, -5, -5], upper_limit=[5, 5, 5], ndim=3, scale=1.0, hole_size=1.0)
 attack:
   pgd_order: skip
 solver:

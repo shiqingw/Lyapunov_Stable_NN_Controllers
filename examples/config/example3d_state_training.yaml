@@ -10,7 +10,7 @@ hydra:
 
 wandb_name: example3d
 
-approximate_lqr: False
+approximate_lqr: True
 
 pgd_verifier_steps: 300
 
@@ -21,10 +21,11 @@ model:
   load_lyaloss: ${user.load_lyaloss}
   kappa: 0.01
   V_decrease_within_roa: True
-  limit_scale: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+  limit_scale: [0.25, 0.5, 0.75, 1.0]
   V_psd_form: "L1"
-  rho_multiplier: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.5, 1.5]
-  limit: [2, 2, 2]
+  rho_multiplier: [2.0, 2.0, 1.5, 1.5]
+  # State-space half-widths: box is x in [-limit, limit] -> [-5,5]^3 here.
+  limit: [5, 5, 5]
   controller_nlayer: 4
   controller_hidden_dim: 8
   # Control input bounds for the clamped neural network controller.
@@ -39,23 +40,24 @@ train:
   hard_max: True
   num_samples_per_boundary: 1024
   batch_size: 1024
-  epochs: 100
+  epochs: 50
   pgd_steps: 150
   Vmin_x_pgd_buffer_size: 65536
-  buffer_size: 131072
-  samples_per_iter: 16384
-  max_iter: 20
+  buffer_size: 65536
+  samples_per_iter: 8192
+  max_iter: 10
   derivative_x_buffer_path: ${user.derivative_x_buffer_path}
 
 loss:
   candidate_scale: 1.
   candidate_roa_states_weight: 0.0001
   l1_reg: 0
+  # Candidate ROA states must lie inside the box [-limit, limit] = [-5,5]^3.
   candidate_roa_states:
-    - [1.5, 1.5, 1.5]
-    - [-1.5, 1.5, -1.5]
-    - [1.5, -1.5, 1.5]
-    - [-1.5, -1.5, -1.5]
-    - [0.0, 1.5, 0.0]
-    - [1.5, 0.0, -1.5]
+    - [3.75, 3.75, 3.75]
+    - [-3.75, 3.75, -3.75]
+    - [3.75, -3.75, 3.75]
+    - [-3.75, -3.75, -3.75]
+    - [0.0, 3.75, 0.0]
+    - [3.75, 0.0, -3.75]
   always_candidate_roa_regulizer: True

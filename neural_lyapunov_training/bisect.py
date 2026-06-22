@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 from contextlib import redirect_stdout, redirect_stderr
-from complete_verifier import ABCROWN
+from complete_verifier.abcrown import ABCROWN
 
 
 def check_rho(rho):
