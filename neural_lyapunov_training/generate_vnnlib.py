@@ -66,9 +66,14 @@ def generate_specs(out, args, lower_limit, upper_limit):
             if not args.check_x_next_only:
                 out.write(f"  (and (<= Y_0 -{args.tolerance}))\n")
             for i, (l, u) in enumerate(zip(args.lower_limit, args.upper_limit)):
-                # "Y_{i+2}"" is X_next[i]
-                out.write(f"  (and (<= Y_{i+2} {l - args.tolerance}))\n")
-                out.write(f"  (and (>= Y_{i+2} {u + args.tolerance}))\n")
+                # "Y_{i+2}"" is X_next[i].
+                # With --ignore_x_next we keep these outputs declared (so the
+                # spec still has the model's full output dim), but widen their
+                # bounds to +/-1e9 so the x_next-in-box disjuncts can never fire.
+                # Only the decrease condition (Y_0) then acts as a counterexample.
+                lo, hi = (-1e9, 1e9) if args.ignore_x_next else (l, u)
+                out.write(f"  (and (<= Y_{i+2} {lo - args.tolerance}))\n")
+                out.write(f"  (and (>= Y_{i+2} {hi + args.tolerance}))\n")
             out.write("))\n")
         else:
             out.write(f"(assert (<= Y_0 -{args.tolerance}))\n")
@@ -160,6 +165,14 @@ def main():
         "--check_x_next_only",
         action="store_true",
         help="Only check if x_next is within the bounding box."
+    )
+    parser.add_argument(
+        "--ignore_x_next",
+        action="store_true",
+        help="Keep the x_next outputs declared (full output dim, so the verifier "
+             "shapes match) but widen their bounds to +/-1e9 so the x_next-in-box "
+             "disjuncts never fire. Verifies the decrease condition only, while "
+             "staying compatible with builds that require #spec_outputs==#model_outputs."
     )
 
     args = parser.parse_args()
