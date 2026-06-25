@@ -11,7 +11,7 @@ hydra:
 wandb_name: pendulum_output
 
 # Boolean to approximate LQR
-approximate_lqr: False
+approximate_lqr: True
 
 pgd_verifier_steps: 300
 
