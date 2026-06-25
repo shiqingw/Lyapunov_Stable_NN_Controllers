@@ -560,6 +560,23 @@ def create_example3d_model(dt=0.05, **kwargs):
     )
 
 
+def create_invpend_model(dt=0.05, m=1.0, l=1.0, beta=0.1, g=9.81, **kwargs):
+    """
+    Build the computational graph for verification of the inverted pendulum
+    (mass m, length l, damping beta) under state feedback. Second-order system
+    with Explicit-Euler discretization; must match invpend_state_training.py.
+    """
+    return create_model(
+        dynamical_system.SecondOrderDiscreteTimeSystem(
+            pendulum.PendulumDynamics(m=m, l=l, beta=beta, g=g),
+            dt=dt,
+            position_integration=dynamical_system.IntegrationMethod.ExplicitEuler,
+            velocity_integration=dynamical_system.IntegrationMethod.ExplicitEuler,
+        ),
+        **kwargs,
+    )
+
+
 def create_quadrotor2d_model(dt=0.01, **kwargs):
     """
     Build the computational graph for verification of the Quadrotor2D model.

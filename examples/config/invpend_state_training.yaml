@@ -1,0 +1,71 @@
+defaults:
+  - user: invpend_state_training_default
+  - train_template
+
+hydra:
+  run:
+    dir: ${user.run_dir}
+  sweep:
+    dir: ${user.run_dir}
+
+wandb_name: invpend
+
+# Warm-start the controller and quadratic Lyapunov from the LQR solution.
+approximate_lqr: True
+
+pgd_verifier_steps: 300
+
+model:
+  # Inverted pendulum physical parameters (beta=0: no damping).
+  m: 1.0
+  l: 1.0
+  beta: 0.0
+  lyapunov:
+    quadratic: True
+    hidden_widths: [16, 16, 8]
+  load_lyaloss: ${user.load_lyaloss}
+  kappa: 0.01
+  V_decrease_within_roa: True
+  limit_scale: [0.25, 0.5, 0.75, 1.0]
+  V_psd_form: "L1"
+  rho_multiplier: [2.0, 2.0, 1.5, 1.5]
+  # State-space half-widths: box is x in [-limit, limit].
+  # theta in [-3.14, 3.14], theta_dot in [-3.0, 3.0].
+  limit: [3.14, 3.0]
+  controller_nlayer: 4
+  controller_hidden_dim: 8
+  # Control input bounds for the clamped neural-network controller: |u| <= 15.
+  u_lo: [-15.0]
+  u_up: [15.0]
+  velocity_integration: "ExplicitEuler"
+  position_integration: "ExplicitEuler"
+  dt: 0.05
+
+train:
+  train_lyaloss: True
+  Vmin_x_pgd_path: ${user.Vmin_x_pgd_path}
+  hard_max: True
+  num_samples_per_boundary: 1024
+  batch_size: 1024
+  epochs: 50
+  pgd_steps: 150
+  Vmin_x_pgd_buffer_size: 65536
+  buffer_size: 65536
+  samples_per_iter: 8192
+  max_iter: 10
+  derivative_x_buffer_path: ${user.derivative_x_buffer_path}
+
+loss:
+  candidate_scale: 1.
+  candidate_roa_states_weight: 0.0001
+  l1_reg: 0
+  # Candidate ROA states (at full limit_scale); scaled by limit_scale per stage.
+  # Must lie inside [-limit, limit] = [-3.14, 3.14] x [-3.0, 3.0].
+  candidate_roa_states:
+    - [2.5, 2.0]
+    - [-2.5, 2.0]
+    - [2.5, -2.0]
+    - [-2.5, -2.0]
+    - [0.0, 2.5]
+    - [2.5, 0.0]
+  always_candidate_roa_regulizer: True
